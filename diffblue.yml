@@ -1,0 +1,334 @@
+buildCmd: ./gradlew assemble
+testCmd: true
+lineLength: 4096
+skipVerification: true
+cbmcArguments:
+  # Do not generate coverage comments on generated tests.
+  java-generate-no-comments: true
+phases:
+  -
+  #Phase 0 PRETTY AND SIMPLE - Simple models, quick cover, pretty Tests, Do Not Test Private Method Directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # Instrument the file as opposed to the function only
+      cover-only: file
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+  -
+  #Phase 1 PRETTY AND COMPLEX - Standard models, longer run time, pretty tests, Do Not Test Private Method Directly
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 2
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # instrument the file as opposed to the function only
+      cover-only: file
+  -
+  #Phase 2 Simple and Private Directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+      # If the logs contain output of the following then proceed to phase X
+    nextPhase:
+      # If the function is not analysable then do not pass onto the next phase
+      not_analyzed: null
+  -
+  #Phase 3 Complex and Private Directly
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 3000
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 3
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+  -
+  #Phase 4 EXCEPTIONS
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: true
+      # Set an upper bound on loop unwinding.
+  -
+    #PHASE 5 Big numbers and less contraints on inputs 
+    timeout: 300
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 100
+      # Bound the length of input strings.
+      max-nondet-string-length: 100
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 6
+units:
+# Target TGF: 18144.75
+#  >methods=195
+#  >complexity=2611
+#  >construction=342.0
+#  >dependency=36.8333333333
+ - target:
+   - dir: common/arcus-protocol/build/classes/java/main
+     file: com/iris/protocol/zigbee/ZclDataUtil.class
+     sourceDir: common/arcus-protocol/src/main/java
+     sourceFile: com/iris/protocol/zigbee/ZclDataUtil.java
+   - dir: common/arcus-protocol/build/classes/java/main
+     file: com/iris/protocol/zigbee/ZclDataUtil$1.class
+     sourceDir: common/arcus-protocol/src/main/java
+     sourceFile: com/iris/protocol/zigbee/ZclDataUtil.java
+# Target TGF: 8135.5
+#  >methods=259
+#  >complexity=4238
+#  >construction=466.75
+#  >dependency=258.0
+ - target:
+   - dir: common/arcus-model/platform-messages/build/classes/java/main
+     file: com/iris/messages/model/subs/SecuritySubsystemModel.class
+     sourceDir: common/arcus-model/platform-messages/src/generated/java
+     sourceFile: com/iris/messages/model/subs/SecuritySubsystemModel.java
+   - dir: common/arcus-model/platform-messages/build/classes/java/main
+     file: com/iris/messages/model/subs/SubsystemModel.class
+     sourceDir: common/arcus-model/platform-messages/src/generated/java
+     sourceFile: com/iris/messages/model/subs/SubsystemModel.java
+   - dir: common/arcus-model/build/classes/java/main
+     file: com/iris/capability/definition/AttributeType.class
+     sourceDir: common/arcus-model/src/main/java
+     sourceFile: com/iris/capability/definition/AttributeType.java
+   - dir: common/arcus-model/platform-messages/build/classes/java/main
+     file: com/iris/messages/model/Model.class
+     sourceDir: common/arcus-model/platform-messages/src/main/java
+     sourceFile: com/iris/messages/model/Model.java
+# Target TGF: 8086.5
+#  >methods=37
+#  >complexity=915
+#  >construction=270.0
+#  >dependency=29.0
+ - target:
+   - dir: agent/arcus-system/build/classes/java/main
+     file: com/iris/agent/util/ByteUtils.class
+     sourceDir: agent/arcus-system/src/main/java
+     sourceFile: com/iris/agent/util/ByteUtils.java
+# Target TGF: 18611.0
+#  >methods=613
+#  >complexity=9661
+#  >construction=1112.0
+#  >dependency=612.0
+ - target:
+   - dir: common/arcus-model/platform-messages/build/classes/java/main
+     file: com/iris/messages/model/serv/HubAlarmModel.class
+     sourceDir: common/arcus-model/platform-messages/src/generated/java
+     sourceFile: com/iris/messages/model/serv/HubAlarmModel.java
+   - dir: common/arcus-model/build/classes/java/main
+     file: com/iris/capability/definition/AttributeType.class
+     sourceDir: common/arcus-model/src/main/java
+     sourceFile: com/iris/capability/definition/AttributeType.java
+   - dir: common/arcus-model/platform-messages/build/classes/java/main
+     file: com/iris/messages/model/DelegateModel.class
+     sourceDir: common/arcus-model/platform-messages/src/main/java
+     sourceFile: com/iris/messages/model/DelegateModel.java
+   - dir: common/arcus-model/platform-messages/build/classes/java/main
+     file: com/iris/messages/model/Model.class
+     sourceDir: common/arcus-model/platform-messages/src/main/java
+     sourceFile: com/iris/messages/model/Model.java
+# Target TGF: 7018.875
+#  >methods=32
+#  >complexity=890
+#  >construction=229.5
+#  >dependency=26.0
+ - target:
+   - dir: common/arcus-protoc-runtime/build/classes/java/main
+     file: com/iris/protoc/runtime/ProtocUtil.class
+     sourceDir: common/arcus-protoc-runtime/src/main/java
+     sourceFile: com/iris/protoc/runtime/ProtocUtil.java
+# Target TGF: 8947.5
+#  >methods=281
+#  >complexity=4831
+#  >construction=493.25
+#  >dependency=280.0
+ - target:
+   - dir: common/arcus-model/platform-messages/build/classes/java/main
+     file: com/iris/messages/model/serv/PlaceModel.class
+     sourceDir: common/arcus-model/platform-messages/src/generated/java
+     sourceFile: com/iris/messages/model/serv/PlaceModel.java
+   - dir: common/arcus-model/build/classes/java/main
+     file: com/iris/capability/definition/AttributeType.class
+     sourceDir: common/arcus-model/src/main/java
+     sourceFile: com/iris/capability/definition/AttributeType.java
+   - dir: common/arcus-model/platform-messages/build/classes/java/main
+     file: com/iris/messages/model/DelegateModel.class
+     sourceDir: common/arcus-model/platform-messages/src/main/java
+     sourceFile: com/iris/messages/model/DelegateModel.java
+   - dir: common/arcus-model/platform-messages/build/classes/java/main
+     file: com/iris/messages/model/Model.class
+     sourceDir: common/arcus-model/platform-messages/src/main/java
+     sourceFile: com/iris/messages/model/Model.java
+# Target TGF: 9901.5
+#  >methods=39
+#  >complexity=1252
+#  >construction=216.0
+#  >dependency=20.6666666667
+ - target:
+   - dir: common/arcus-client/build/classes/java/main
+     file: com/iris/Utils.class
+     sourceDir: common/arcus-client/src/main/java
+     sourceFile: com/iris/Utils.java
+# Target TGF: 14171.5
+#  >methods=459
+#  >complexity=7543
+#  >construction=817.25
+#  >dependency=458.0
+ - target:
+   - dir: common/arcus-model/platform-messages/build/classes/java/main
+     file: com/iris/messages/model/serv/ProductModel.class
+     sourceDir: common/arcus-model/platform-messages/src/generated/java
+     sourceFile: com/iris/messages/model/serv/ProductModel.java
+   - dir: common/arcus-model/build/classes/java/main
+     file: com/iris/capability/definition/AttributeType.class
+     sourceDir: common/arcus-model/src/main/java
+     sourceFile: com/iris/capability/definition/AttributeType.java
+   - dir: common/arcus-model/platform-messages/build/classes/java/main
+     file: com/iris/messages/model/DelegateModel.class
+     sourceDir: common/arcus-model/platform-messages/src/main/java
+     sourceFile: com/iris/messages/model/DelegateModel.java
+   - dir: common/arcus-model/platform-messages/build/classes/java/main
+     file: com/iris/messages/model/Model.class
+     sourceDir: common/arcus-model/platform-messages/src/main/java
+     sourceFile: com/iris/messages/model/Model.java
+# Target TGF: 7046.0
+#  >methods=224
+#  >complexity=3794
+#  >construction=394.0
+#  >dependency=223.0
+ - target:
+   - dir: common/arcus-model/platform-messages/build/classes/java/main
+     file: com/iris/messages/model/hub/HubAdvancedModel.class
+     sourceDir: common/arcus-model/platform-messages/src/generated/java
+     sourceFile: com/iris/messages/model/hub/HubAdvancedModel.java
+   - dir: common/arcus-model/build/classes/java/main
+     file: com/iris/capability/definition/AttributeType.class
+     sourceDir: common/arcus-model/src/main/java
+     sourceFile: com/iris/capability/definition/AttributeType.java
+   - dir: common/arcus-model/platform-messages/build/classes/java/main
+     file: com/iris/messages/model/hub/HubModel.class
+     sourceDir: common/arcus-model/platform-messages/src/generated/java
+     sourceFile: com/iris/messages/model/hub/HubModel.java
+   - dir: common/arcus-model/platform-messages/build/classes/java/main
+     file: com/iris/messages/model/Model.class
+     sourceDir: common/arcus-model/platform-messages/src/main/java
+     sourceFile: com/iris/messages/model/Model.java
+# Target TGF: 9610.5
+#  >methods=320
+#  >complexity=5083
+#  >construction=572.75
+#  >dependency=319.0
+ - target:
+   - dir: common/arcus-model/platform-messages/build/classes/java/main
+     file: com/iris/messages/model/subs/AlarmSubsystemModel.class
+     sourceDir: common/arcus-model/platform-messages/src/generated/java
+     sourceFile: com/iris/messages/model/subs/AlarmSubsystemModel.java
+   - dir: common/arcus-model/platform-messages/build/classes/java/main
+     file: com/iris/messages/model/subs/SubsystemModel.class
+     sourceDir: common/arcus-model/platform-messages/src/generated/java
+     sourceFile: com/iris/messages/model/subs/SubsystemModel.java
+   - dir: common/arcus-model/build/classes/java/main
+     file: com/iris/capability/definition/AttributeType.class
+     sourceDir: common/arcus-model/src/main/java
+     sourceFile: com/iris/capability/definition/AttributeType.java
+   - dir: common/arcus-model/platform-messages/build/classes/java/main
+     file: com/iris/messages/model/Model.class
+     sourceDir: common/arcus-model/platform-messages/src/main/java
+     sourceFile: com/iris/messages/model/Model.java
